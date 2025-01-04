@@ -1,0 +1,120 @@
+import React, { useState, useEffect } from "react";
+import axios from "axios";
+import "./AboutUs.css"; // Add styling for the user profile
+
+const AboutUs = (props) => {
+  const [aboutUsList, setAboutUsList] = useState([]);
+  const [profile, setProfile] = useState(null);
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [currentId, setCurrentId] = useState(null);
+  const userId = "123"; // Example userId, replace with dynamic user authentication logic
+
+  useEffect(() => {
+    fetchAboutUs();
+    fetchUserProfile();
+  }, []);
+
+  const fetchAboutUs = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/api/about");
+      setAboutUsList(response.data);
+    } catch (error) {
+      console.error("Error fetching About Us data", error);
+    }
+  };
+
+const fetchUserProfile = async () => {
+    try {
+      const response = await axios.get(`http://localhost:5000/api/about/profile/${userId}`);
+      setUserProfile(response.data);
+    } catch (error) {
+      console.error("Error fetching user profile", error);
+    }
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (currentId) {
+      await axios.put(`http://localhost:5000/api/about/${currentId}`, {
+        title,
+        content,
+      });
+    } else {
+      await axios.post("http://localhost:5000/api/about", { title, content });
+    }
+    setTitle("");
+    setContent("");
+    setCurrentId(null);
+    fetchAboutUs();
+  };
+
+  return (
+    <div className="about-us-container">
+      <div className="left-section">
+        <h1>About Us</h1>
+        <h4>You can drop your comments/experience about us...</h4>
+        <p>
+          This project is created by {props.name1}, {props.name2}, {props.name3}
+          .
+        </p>
+        <form onSubmit={handleSubmit}>
+          <input
+            type="text"
+            placeholder="Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+          <textarea
+            placeholder="Content"
+            value={content}
+            onChange={(e) => setContent(e.target.value)}
+          ></textarea>
+          <button type="submit">{currentId ? "Update" : "Create"}</button>
+        </form>
+        <ul>
+          {aboutUsList.map((item) => (
+            <li key={item._id}>
+              <h2>{item.title}</h2>
+              <p>{item.content}</p>
+              <button onClick={() => setCurrentId(item._id)}>Edit</button>
+              <button
+                onClick={() =>
+                  axios
+                    .delete(`http://localhost:5000/api/about/${item._id}`)
+                    .then(fetchAboutUs)
+                }
+              >
+                Delete
+              </button>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="right-section">
+        {profile ? (
+          <div className="profile">
+            <img
+              src={`http://localhost:5000/images/${profile.profilePicture}`}
+              alt="Profile"
+              className="profile-picture"
+            />
+            <h2>User Profile</h2>
+            <p>Total Quizzes: {profile.scores.length}</p>
+            {profile.scores.map((score, index) => (
+              <div key={index}>
+                <p>Quiz ID: {score.quizId}</p>
+                <p>Score: {score.score}</p>
+                <p>Wrong Answers: {score.wrongAnswers}</p>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p>Loading profile...</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default AboutUs;

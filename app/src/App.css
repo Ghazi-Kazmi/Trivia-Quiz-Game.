@@ -1,0 +1,22 @@
+.result-page {
+  font-family: Arial, sans-serif;
+  text-align: center;
+  padding: 20px;
+}
+
+.result-inner {
+  border: 1px solid #ccc;
+  padding: 20px;
+  border-radius: 10px;
+  background-color: #f9f9f9;
+}
+
+.result {
+  margin: 20px 0;
+}
+
+.result-message {
+  font-size: 20px;
+  font-weight: bold;
+  color: #28a745;
+}
